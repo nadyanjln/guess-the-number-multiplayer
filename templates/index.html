@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Number Multiplayer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Inter", "ui-sans-serif", "system-ui", "Segoe UI", "Arial"],
+                        mono: ["JetBrains Mono", "Consolas", "ui-monospace", "monospace"]
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="min-h-screen bg-gray-50 text-slate-950 antialiased">
+    <main class="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
+        <header class="flex flex-col gap-4 rounded-3xl border border-white bg-white/90 p-5 shadow-sm shadow-blue-100/70 backdrop-blur md:flex-row md:items-center md:justify-between">
+            <div class="flex items-center gap-3">
+                <div class="grid h-11 w-11 place-items-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200">
+                    <i data-lucide="gamepad-2" class="h-6 w-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Guess The Number</h1>
+                    <p class="text-sm font-medium text-slate-500">Casual multiplayer room battle</p>
+                </div>
+            </div>
+            <div id="connectionStatus" class="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-black text-slate-500 transition-all duration-300">
+                <span class="h-2.5 w-2.5 rounded-full bg-slate-400"></span>
+                OFFLINE
+            </div>
+        </header>
+
+        <section id="mainPanel" class="rounded-3xl border border-white bg-white p-5 shadow-xl shadow-blue-100/60 transition-all duration-300">
+            <div class="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+                <div class="rounded-3xl bg-gradient-to-br from-blue-600 to-blue-500 p-6 text-white shadow-lg shadow-blue-200">
+                    <div class="mb-8 grid h-14 w-14 place-items-center rounded-2xl bg-white/15">
+                        <i data-lucide="sparkles" class="h-7 w-7"></i>
+                    </div>
+                    <h2 class="text-3xl font-black tracking-tight">Ready to play?</h2>
+                    <p class="mt-2 max-w-xl text-base font-medium text-blue-50">Make a room, invite friends, and race to guess the same hidden number each round.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <label for="playerName" class="mb-2 flex items-center gap-2 text-sm font-black text-slate-600">
+                            <i data-lucide="user-round" class="h-4 w-4"></i>
+                            Player Name
+                        </label>
+                        <input id="playerName" maxlength="24" placeholder="Player A" class="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-lg font-bold text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
+                    </div>
+
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <button class="group rounded-2xl bg-white px-5 py-4 text-left font-black text-slate-900 shadow-sm ring-1 ring-slate-200 transition duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-lg active:translate-y-0" id="showJoinBtn">
+                            <span class="mb-2 grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-600 transition group-hover:bg-blue-100">
+                                <i data-lucide="log-in" class="h-5 w-5"></i>
+                            </span>
+                            Join Game
+                        </button>
+                        <button class="group rounded-2xl bg-blue-600 px-5 py-4 text-left font-black text-white shadow-lg shadow-blue-200 transition duration-200 hover:-translate-y-0.5 hover:bg-blue-700 active:translate-y-0" id="showMakeBtn">
+                            <span class="mb-2 grid h-10 w-10 place-items-center rounded-xl bg-white/15">
+                                <i data-lucide="plus" class="h-5 w-5"></i>
+                            </span>
+                            Make a Room
+                        </button>
+                    </div>
+
+                    <div id="makePanel" class="hidden rounded-2xl border border-blue-100 bg-blue-50 p-4 transition-all duration-300">
+                        <h2 class="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-blue-700">
+                            <i data-lucide="users-round" class="h-4 w-4"></i>
+                            Choose Players
+                        </h2>
+                        <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                            <button data-capacity="2" class="rounded-xl bg-white px-3 py-4 text-sm font-black text-slate-800 shadow-sm ring-1 ring-blue-100 transition hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white">2 Player</button>
+                            <button data-capacity="3" class="rounded-xl bg-white px-3 py-4 text-sm font-black text-slate-800 shadow-sm ring-1 ring-blue-100 transition hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white">3 Player</button>
+                            <button data-capacity="4" class="rounded-xl bg-white px-3 py-4 text-sm font-black text-slate-800 shadow-sm ring-1 ring-blue-100 transition hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white">4 Player</button>
+                            <button data-capacity="5" class="rounded-xl bg-white px-3 py-4 text-sm font-black text-slate-800 shadow-sm ring-1 ring-blue-100 transition hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white">5 Player</button>
+                        </div>
+                    </div>
+
+                    <div id="joinPanel" class="hidden rounded-2xl border border-green-100 bg-green-50 p-4 transition-all duration-300">
+                        <h2 class="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-green-700">
+                            <i data-lucide="door-open" class="h-4 w-4"></i>
+                            Room Code
+                        </h2>
+                        <div class="grid gap-2 sm:grid-cols-[1fr_auto]">
+                            <input id="roomCodeInput" maxlength="6" placeholder="AB12CD" class="h-12 rounded-xl border border-green-100 bg-white px-4 font-mono text-lg font-black uppercase tracking-wider text-slate-900 outline-none transition focus:border-green-500 focus:ring-4 focus:ring-green-100">
+                            <button class="rounded-xl bg-green-600 px-5 py-3 font-black text-white shadow-lg shadow-green-100 transition hover:-translate-y-0.5 hover:bg-green-700 active:translate-y-0" id="joinBtn">Join</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roomPanel" class="hidden flex-1 transition-all duration-300">
+            <div class="mb-5 rounded-3xl border border-white bg-white p-4 shadow-xl shadow-blue-100/60 sm:p-5">
+                <div class="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+                    <div class="min-w-0">
+                        <p class="mb-2 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-slate-500">
+                            <i data-lucide="hash" class="h-4 w-4"></i>
+                            Room Code
+                        </p>
+                        <div id="roomCode" class="font-mono text-4xl font-black tracking-widest text-slate-950 sm:text-5xl">------</div>
+                    </div>
+
+                    <div class="grid w-full gap-2 sm:grid-cols-2 xl:w-auto xl:grid-cols-[auto_auto_auto_auto] xl:justify-end">
+                        <div id="roundMeta" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-blue-50/80 px-3.5 py-2 text-sm font-black text-blue-700 shadow-sm transition-all duration-300">Round 0/5</div>
+                        <div id="statusMeta" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm font-black text-slate-700 shadow-sm transition-all duration-300">Waiting</div>
+                        <div id="playerMeta" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-green-100 bg-green-50/80 px-3.5 py-2 text-sm font-black text-green-700 shadow-sm transition-all duration-300">Players 0/0</div>
+                        <div class="inline-flex min-h-12 items-center justify-center gap-3 rounded-2xl border border-orange-100 bg-orange-50/80 px-3.5 py-2 text-orange-700 shadow-sm transition-all duration-300">
+                            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white/80">
+                                <i data-lucide="timer" class="h-4 w-4"></i>
+                            </span>
+                            <div class="text-left">
+                                <div class="text-[10px] font-black uppercase leading-none tracking-wide text-orange-500">Timer</div>
+                                <div id="roundTimer" class="mt-0.5 font-mono text-xl font-black leading-none">00:00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <button id="playAgainBtn" class="hidden rounded-xl bg-green-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-green-100 transition hover:-translate-y-0.5 hover:bg-green-700 active:translate-y-0">Play Again</button>
+                    <button id="backBtn" class="rounded-xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-200 active:translate-y-0">Leave Room</button>
+                </div>
+            </div>
+
+            <section id="waitingHall" class="rounded-[2rem] border border-white bg-white p-6 shadow-2xl shadow-blue-100 transition-all duration-300">
+                <div class="mx-auto max-w-3xl text-center">
+                    <div class="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-3xl bg-blue-600 text-white shadow-xl shadow-blue-200">
+                        <i data-lucide="users-round" class="h-8 w-8"></i>
+                    </div>
+                    <h2 id="waitingTitle" class="text-3xl font-black tracking-tight text-slate-950">Waiting for players...</h2>
+                    <p id="waitingSubtitle" class="mt-2 text-sm font-semibold text-slate-500">Share the room code and get everyone in.</p>
+                    <div id="countdownDisplay" class="mt-6 hidden font-mono text-8xl font-black leading-none text-blue-600 transition-all duration-300">3</div>
+                </div>
+                <div class="mx-auto mt-8 max-w-2xl">
+                    <div class="mb-3 flex items-center justify-between">
+                        <h3 class="text-sm font-black uppercase tracking-wide text-slate-500">Players</h3>
+                        <span id="waitingPlayerCount" class="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">0/0 Players</span>
+                    </div>
+                    <div id="waitingPlayersList" class="space-y-3"></div>
+                </div>
+            </section>
+
+            <div id="gameBoard" class="grid gap-5 md:grid-cols-2 lg:grid-cols-[minmax(220px,0.85fr)_minmax(360px,1.35fr)_minmax(240px,0.9fr)]">
+                <aside class="order-2 rounded-3xl border border-white bg-white p-4 shadow-lg shadow-slate-100 transition-all duration-300 lg:order-1">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h2 id="leaderTitle" class="flex items-center gap-2 text-lg font-black text-slate-950">
+                            <i data-lucide="trophy" class="h-5 w-5 text-orange-500"></i>
+                            Leaderboard
+                        </h2>
+                    </div>
+                    <div id="leaderboard" class="space-y-3"></div>
+                    <div id="finalPanel" class="hidden mt-4 rounded-2xl bg-gradient-to-r from-orange-50 to-yellow-50 p-4 ring-1 ring-orange-100">
+                        <h2 class="text-lg font-black text-orange-700">Final Result</h2>
+                    </div>
+                </aside>
+
+                <section id="guessBox" class="order-1 rounded-[2rem] border border-white bg-white p-5 shadow-2xl shadow-blue-100 transition-all duration-300 md:col-span-2 lg:order-2 lg:col-span-1">
+                    <div class="mb-5 flex items-center justify-center">
+                        <div class="grid h-16 w-16 place-items-center rounded-3xl bg-blue-600 text-white shadow-xl shadow-blue-200">
+                            <i data-lucide="target" class="h-8 w-8"></i>
+                        </div>
+                    </div>
+                    <h2 class="text-center text-3xl font-black tracking-tight text-slate-950">Guess the Number</h2>
+                    <p id="roundInfo" class="mx-auto mt-2 max-w-md text-center text-sm font-semibold text-slate-500">Menunggu ronde dimulai.</p>
+
+                    <div id="finishedPanel" class="mt-6 hidden rounded-3xl bg-green-50 p-5 text-center ring-1 ring-green-100 transition-all duration-300">
+                        <div class="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-full bg-green-600 text-white">
+                            <i data-lucide="check" class="h-7 w-7"></i>
+                        </div>
+                        <h3 class="text-xl font-black text-green-700">You finished this round!</h3>
+                        <p class="mt-1 text-sm font-semibold text-green-600">Waiting for other players...</p>
+                    </div>
+
+                    <div id="guessControls" class="mt-6 space-y-4">
+                        <input id="guessInput" type="number" min="1" max="100" placeholder="1-100" class="h-20 w-full rounded-3xl border-2 border-blue-100 bg-blue-50 px-5 text-center text-4xl font-black text-slate-950 outline-none transition duration-200 placeholder:text-slate-300 focus:border-blue-500 focus:bg-white focus:ring-8 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400">
+                        <button id="guessBtn" class="h-16 w-full rounded-3xl bg-blue-600 text-xl font-black text-white shadow-xl shadow-blue-200 transition duration-200 hover:-translate-y-0.5 hover:bg-blue-700 active:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none">Submit Guess</button>
+                    </div>
+
+                    <div id="message" class="mt-5 hidden rounded-3xl border border-blue-100 bg-blue-50 px-5 py-4 text-center text-lg font-black text-blue-700 transition-all duration-300"></div>
+                </section>
+
+                <aside class="order-3 rounded-3xl border border-white bg-white p-4 shadow-lg shadow-slate-100 transition-all duration-300">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h2 class="flex items-center gap-2 text-lg font-black text-slate-950">
+                            <i data-lucide="users-round" class="h-5 w-5 text-blue-600"></i>
+                            Players
+                        </h2>
+                    </div>
+                    <div id="playersList" class="space-y-3"></div>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
