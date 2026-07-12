@@ -75,12 +75,6 @@ git clone <repository-url>
 cd tugas_akhir
 ```
 
-Jika project sudah ada di mesin lokal:
-
-```powershell
-cd C:\Study\SEM8\PJAR\tugas_akhir
-```
-
 ### Install Dependencies
 
 ```bash
@@ -192,20 +186,3 @@ Saat browser refresh:
 Saat socket disconnect, player tidak langsung dihapus dari game yang sedang berjalan. Server menandai player sebagai offline agar player bisa reconnect.
 
 Jika server di-restart, semua room aktif akan hilang karena state hanya disimpan di memory.
-
-## Future Improvements
-
-- Database persistence untuk room dan game history.
-- Redis adapter untuk multi-process atau multi-server Socket.IO.
-- Authentication dan player profile.
-- Public leaderboard.
-- Match history.
-- Difficulty levels.
-- Spectator mode.
-- Chat antar pemain.
-- Room expiration dan cleanup otomatis.
-- Deployment-ready WSGI/ASGI setup.
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
