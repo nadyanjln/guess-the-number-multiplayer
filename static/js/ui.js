@@ -12,6 +12,7 @@ import {
 } from "./utils.js";
 
 export const elements = {
+    appShell: $("#appShell"),
     mainPanel: $("#mainPanel"),
     roomPanel: $("#roomPanel"),
     makePanel: $("#makePanel"),
@@ -42,6 +43,7 @@ export function render(snapshot, state, socket, canSubmitGuess) {
     state.snapshot = snapshot;
 
     if (!snapshot) {
+        setShellCentered(true);
         elements.mainPanel.classList.remove("hidden");
         elements.roomPanel.classList.add("hidden");
         renderConnection(socket.connected ? "ONLINE" : "OFFLINE");
@@ -52,17 +54,27 @@ export function render(snapshot, state, socket, canSubmitGuess) {
 
     syncServerClock(snapshot, state);
     state.pendingCorrect = false;
+    setShellCentered(isCenteredRoomState(snapshot));
     elements.mainPanel.classList.add("hidden");
     elements.roomPanel.classList.remove("hidden");
+    elements.roomPanel.classList.toggle("flex-1", !isCenteredRoomState(snapshot));
     renderConnection("ONLINE");
     renderRoomHeader(snapshot);
     renderLobbyState(snapshot, state);
-    renderPlayers(snapshot, state);
     renderGuessArea(snapshot, state, canSubmitGuess);
     renderLeaderboard(snapshot, state);
     renderFinal(snapshot, state);
     updateTimerDisplay(state);
     renderIcons();
+}
+
+function setShellCentered(centered) {
+    elements.appShell.classList.toggle("justify-center", centered);
+    elements.appShell.classList.toggle("justify-start", !centered);
+}
+
+function isCenteredRoomState(snapshot) {
+    return [GAME_STATUS.WAITING, GAME_STATUS.STARTING].includes(snapshot.status);
 }
 
 export function renderGuessArea(snapshot, state, canSubmitGuess) {
@@ -252,25 +264,9 @@ function renderWaitingPlayers(snapshot) {
     renderIcons();
 }
 
-function renderPlayers(snapshot, state) {
-    const list = $("#playersList");
-    list.innerHTML = "";
-    const players = [...snapshot.players];
-
-    for (let index = 0; index < snapshot.capacity; index += 1) {
-        const player = players[index];
-        if (!player) {
-            list.insertAdjacentHTML("beforeend", waitingPlayerTemplate());
-            continue;
-        }
-        list.insertAdjacentHTML("beforeend", playerTemplate(player, player.id === state.playerId));
-    }
-    renderIcons();
-}
-
 function renderLeaderboard(snapshot, state) {
     const board = $("#leaderboard");
-    const rows = snapshot.leaderboard || [];
+    const rows = leaderboardRows(snapshot);
     $("#leaderTitle").innerHTML =
         '<i data-lucide="trophy" class="h-5 w-5 text-orange-500"></i>' +
         (snapshot.status === GAME_STATUS.GAME_OVER ? "Final Leaderboard" : "Leaderboard");
@@ -292,6 +288,46 @@ function renderLeaderboard(snapshot, state) {
     renderIcons();
 }
 
+function leaderboardRows(snapshot) {
+    const playersById = new Map(snapshot.players.map((player) => [player.id, player]));
+    const rankedRows = (snapshot.leaderboard || []).map((row) => {
+        const player = playersById.get(row.playerId || row.player_id);
+        return {
+            ...row,
+            ...player,
+            rank: row.rank,
+            score: row.score ?? player?.total_score ?? player?.score ?? 0,
+            guess_count: row.guess_count ?? row.attempts ?? player?.guess_count ?? player?.attempts ?? 0,
+            round_duration: row.round_duration ?? row.roundDuration ?? player?.round_duration ?? player?.roundDuration ?? null,
+            playerId: row.playerId || row.player_id || player?.id,
+            player_id: row.player_id || row.playerId || player?.id,
+            name: row.name || row.playerName || player?.name || player?.playerName,
+            status: row.status || player?.status || PLAYER_STATUS.WAITING,
+            connected: row.connected ?? player?.connected ?? false,
+            is_host: player?.is_host ?? player?.isHost ?? false,
+        };
+    });
+
+    if (rankedRows.length) return rankedRows;
+
+    return [...snapshot.players]
+        .sort((first, second) => {
+            const scoreDiff = Number(second.total_score || second.score || 0) - Number(first.total_score || first.score || 0);
+            if (scoreDiff !== 0) return scoreDiff;
+            return String(first.name).localeCompare(String(second.name));
+        })
+        .map((player, index) => ({
+            ...player,
+            rank: index + 1,
+            score: player.total_score ?? player.score ?? 0,
+            guess_count: player.guess_count ?? player.attempts ?? 0,
+            round_duration: player.round_duration ?? player.roundDuration ?? null,
+            playerId: player.id,
+            player_id: player.id,
+            is_host: player.is_host ?? player.isHost ?? false,
+        }));
+}
+
 function renderFinal(snapshot, state) {
     const isHost = snapshot.host_player_id === state.playerId;
     $("#finalPanel").classList.toggle("hidden", snapshot.status !== GAME_STATUS.GAME_OVER);
@@ -309,19 +345,6 @@ function renderFinal(snapshot, state) {
         </div>
     `;
     renderIcons();
-}
-
-function waitingPlayerTemplate() {
-    return `
-        <div class="rounded-2xl border border-dashed border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4 text-sm font-black text-slate-400 transition-all duration-300">
-            <div class="flex items-center gap-3">
-                <div class="grid h-11 w-11 place-items-center rounded-full bg-white text-slate-300">
-                    <i data-lucide="user-plus" class="h-5 w-5"></i>
-                </div>
-                Waiting...
-            </div>
-        </div>
-    `;
 }
 
 function waitingPlayerSlotTemplate() {
@@ -361,59 +384,35 @@ function waitingPlayerJoinedTemplate(player) {
     `;
 }
 
-function playerTemplate(player, isCurrentPlayer) {
-    const finished = player.status === PLAYER_STATUS.FINISHED_ROUND;
-    const waiting = player.status === PLAYER_STATUS.WAITING;
-    const statusLabel = finished ? "Finished" : waiting ? "Waiting" : "Playing";
-    const dotClass = player.connected ? "bg-green-500" : "bg-red-500";
-    const statusClass = playerStatusTone(player.status);
-    const onlineClass = player.connected
-        ? "bg-green-50 text-green-700 ring-green-100"
-        : "bg-red-50 text-red-700 ring-red-100";
-    const cardTone = isCurrentPlayer
-        ? "border-blue-200 bg-gradient-to-br from-blue-50 to-white ring-2 ring-blue-100"
-        : "border-slate-100 bg-white";
-
-    return `
-        <div class="rounded-2xl border p-3 shadow-lg shadow-slate-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-soft ${cardTone} ${finished ? "animate-[pulse_1s_ease-in-out_1]" : ""}">
-            <div class="flex items-center gap-3">
-                <div class="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-black text-white shadow-lg shadow-blue-100">
-                    ${initials(player.name)}
-                    <span class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white ${dotClass}"></span>
-                </div>
-                <div class="min-w-0 flex-1">
-                    <div class="flex flex-wrap items-center gap-1 text-base font-black text-slate-950">
-                        ${escapeHtml(player.name)}
-                        ${isCurrentPlayer ? '<span class="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-black text-white">You</span>' : ""}
-                    </div>
-                    <div class="mt-1.5 flex flex-wrap gap-1.5">
-                        ${player.is_host ? '<span class="inline-flex items-center gap-1 rounded-full bg-yellow-50 px-2.5 py-1 text-xs font-black text-yellow-700 ring-1 ring-yellow-100"><i data-lucide="crown" class="h-3.5 w-3.5"></i>Host</span>' : ""}
-                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-black ring-1 ${onlineClass}">${player.connected ? "Online" : "Offline"}</span>
-                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-black ring-1 ${statusClass}">${statusLabel}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-3 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-1.5">
-                <span class="flex items-center gap-1 text-xs font-black text-slate-400"><i data-lucide="star" class="h-3.5 w-3.5"></i>Score</span>
-                <span class="font-mono text-lg font-black text-slate-900">${player.total_score} pts</span>
-            </div>
-        </div>
-    `;
-}
-
 function leaderboardRowTemplate(row, isCurrentPlayer) {
     const currentClass = isCurrentPlayer ? "ring-2 ring-blue-200" : "";
+    const finished = row.status === PLAYER_STATUS.FINISHED_ROUND;
+    const waiting = row.status === PLAYER_STATUS.WAITING;
+    const statusLabel = finished ? "Finished" : waiting ? "Waiting" : "Playing";
+    const dotClass = row.connected ? "bg-green-500" : "bg-red-500";
+    const onlineClass = row.connected
+        ? "bg-green-50 text-green-700 ring-green-100"
+        : "bg-red-50 text-red-700 ring-red-100";
+
     return `
-        <div class="rounded-2xl border p-3 shadow-lg shadow-slate-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-soft ${rankTone(row.rank)} ${currentClass} animate-[pulse_1s_ease-in-out_1]">
+        <div class="rounded-2xl border p-3 shadow-lg shadow-slate-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-soft ${rankTone(row.rank)} ${currentClass} ${finished ? "animate-[pulse_1s_ease-in-out_1]" : ""}">
             <div class="flex items-center gap-3">
                 <div class="grid h-11 w-11 place-items-center rounded-2xl bg-white text-2xl shadow-lg shadow-slate-200/60">${rankMedal(row.rank)}</div>
-                <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-xs font-black text-white shadow-lg shadow-blue-100">${initials(row.name)}</div>
+                <div class="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-xs font-black text-white shadow-lg shadow-blue-100">
+                    ${initials(row.name)}
+                    <span class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white ${dotClass}"></span>
+                </div>
                 <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-1 text-base font-black text-slate-950">
                         <span class="truncate">${escapeHtml(row.name)}</span>
                         ${isCurrentPlayer ? '<span class="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-black text-white">You</span>' : ""}
                     </div>
-                    <div class="mt-1 text-xs font-bold text-slate-500">${row.guess_count} guesses${row.round_duration != null ? ` | ${formatTimer(row.round_duration)}` : ""}</div>
+                    <div class="mt-1.5 flex flex-wrap gap-1.5">
+                        ${row.is_host ? '<span class="inline-flex items-center gap-1 rounded-full bg-yellow-50 px-2.5 py-1 text-xs font-black text-yellow-700 ring-1 ring-yellow-100"><i data-lucide="crown" class="h-3.5 w-3.5"></i>Host</span>' : ""}
+                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-black ring-1 ${onlineClass}">${row.connected ? "Online" : "Offline"}</span>
+                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-black ring-1 ${playerStatusTone(row.status)}">${statusLabel}</span>
+                    </div>
+                    <div class="mt-1.5 text-xs font-bold text-slate-500">${row.guess_count} guesses${row.round_duration != null ? ` | ${formatTimer(row.round_duration)}` : ""}</div>
                 </div>
             </div>
             <div class="mt-3 flex items-center justify-between rounded-xl bg-white/70 px-3 py-1.5">

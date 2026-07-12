@@ -31,8 +31,9 @@
     <div class="pointer-events-none fixed inset-0 -z-10 bg-[linear-gradient(120deg,transparent_0%,rgba(59,130,246,0.18)_38%,transparent_64%),linear-gradient(30deg,rgba(20,184,166,0.10)_0%,transparent_42%)]"></div>
     <div class="pointer-events-none fixed inset-0 -z-10 opacity-20 bg-[linear-gradient(to_right,rgba(255,255,255,0.20)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.20)_1px,transparent_1px)] bg-[size:48px_48px]"></div>
 
-    <main class="mx-auto flex min-h-screen w-full max-w-[1380px] flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <header class="flex flex-col gap-3 rounded-2xl border border-white/15 bg-white/90 p-3 text-slate-950 shadow-soft backdrop-blur-xl sm:p-4 md:flex-row md:items-center md:justify-between">
+    <main id="appShell" class="mx-auto flex min-h-screen w-full max-w-[1280px] flex-col justify-center gap-4 px-4 py-6 transition-all duration-300 sm:px-6 lg:px-8">
+        <header class="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/30 bg-white/90 p-3 text-slate-950 shadow-soft backdrop-blur-xl sm:p-4 md:flex-row md:items-center md:justify-between">
+            <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-500 to-green-500"></div>
             <div class="flex items-center gap-3">
                 <div class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-glow transition duration-300 hover:scale-105">
                     <i data-lucide="gamepad-2" class="h-5 w-5"></i>
@@ -48,10 +49,13 @@
             </div>
         </header>
 
-        <section id="mainPanel" class="overflow-hidden rounded-2xl border border-white/20 bg-white/95 p-4 shadow-soft transition-all duration-300 sm:p-5">
-            <div class="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+        <section id="mainPanel" class="relative overflow-hidden rounded-[1.75rem] border border-white/35 bg-white/95 p-4 shadow-[0_28px_90px_rgba(15,23,42,0.26)] backdrop-blur-xl transition-all duration-300 sm:p-5">
+            <div class="pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-green-500"></div>
+            <div class="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(37,99,235,0.08),transparent_36%),linear-gradient(315deg,rgba(34,197,94,0.10),transparent_42%)]"></div>
+            <div class="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch">
                 <div class="relative overflow-hidden rounded-2xl border border-blue-400/20 bg-slate-950 p-6 text-white shadow-glow sm:p-8">
-                    <div class="absolute inset-0 opacity-40 bg-[linear-gradient(135deg,rgba(37,99,235,0.75)_0%,transparent_46%),linear-gradient(45deg,transparent_46%,rgba(34,197,94,0.45)_130%)]"></div>
+                    <div class="absolute inset-0 opacity-50 bg-[linear-gradient(135deg,rgba(37,99,235,0.75)_0%,transparent_46%),linear-gradient(45deg,transparent_46%,rgba(34,197,94,0.45)_130%)]"></div>
+                    <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-blue-950/70 to-transparent"></div>
                     <div class="relative">
                         <div class="mb-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black text-blue-50">
                             <i data-lucide="sparkles" class="h-4 w-4"></i>
@@ -76,56 +80,59 @@
                     </div>
                 </div>
 
-                <div class="space-y-4">
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-lg shadow-slate-200/40 transition duration-300 hover:-translate-y-0.5 hover:shadow-soft">
-                        <label for="playerName" class="mb-2 flex items-center gap-2 text-sm font-black text-slate-600">
-                            <i data-lucide="user-round" class="h-4 w-4 text-blue-600"></i>
-                            Player Name
-                        </label>
-                        <input id="playerName" maxlength="24" placeholder="Player A" class="h-14 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-lg font-bold text-slate-900 outline-none transition duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
-                    </div>
-
-                    <div class="grid gap-3 sm:grid-cols-2">
-                        <button class="group rounded-2xl border border-slate-200 bg-white px-5 py-5 text-left font-black text-slate-900 shadow-lg shadow-slate-200/50 transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-soft focus:outline-none focus:ring-4 focus:ring-blue-100 active:translate-y-0" id="showJoinBtn">
-                            <span class="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-600 transition duration-300 group-hover:bg-blue-600 group-hover:text-white">
-                                <i data-lucide="log-in" class="h-5 w-5"></i>
-                            </span>
-                            <span class="block text-lg">Join Game</span>
-                            <span class="mt-1 block text-xs font-bold text-slate-400">Enter a room code</span>
-                        </button>
-                        <button class="group rounded-2xl bg-blue-600 px-5 py-5 text-left font-black text-white shadow-glow transition duration-300 hover:-translate-y-1 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200 active:translate-y-0" id="showMakeBtn">
-                            <span class="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-white/15 transition duration-300 group-hover:bg-white/25">
-                                <i data-lucide="plus" class="h-5 w-5"></i>
-                            </span>
-                            <span class="block text-lg">Make a Room</span>
-                            <span class="mt-1 block text-xs font-bold text-blue-100">Host a new match</span>
-                        </button>
-                    </div>
-
-                    <div id="makePanel" class="hidden rounded-2xl border border-blue-100 bg-blue-50/80 p-4 shadow-lg shadow-blue-100/50 transition-all duration-300">
-                        <h2 class="mb-3 flex items-center gap-2 text-sm font-black text-blue-700">
-                            <i data-lucide="users-round" class="h-4 w-4"></i>
-                            Choose Players
-                        </h2>
-                        <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                            <button data-capacity="2" class="rounded-xl bg-white px-3 py-4 text-sm font-black text-slate-800 shadow-sm ring-1 ring-blue-100 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-100 active:translate-y-0">2 Player</button>
-                            <button data-capacity="3" class="rounded-xl bg-white px-3 py-4 text-sm font-black text-slate-800 shadow-sm ring-1 ring-blue-100 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-100 active:translate-y-0">3 Player</button>
-                            <button data-capacity="4" class="rounded-xl bg-white px-3 py-4 text-sm font-black text-slate-800 shadow-sm ring-1 ring-blue-100 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-100 active:translate-y-0">4 Player</button>
-                            <button data-capacity="5" class="rounded-xl bg-white px-3 py-4 text-sm font-black text-slate-800 shadow-sm ring-1 ring-blue-100 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-100 active:translate-y-0">5 Player</button>
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-[0_18px_60px_rgba(37,99,235,0.12)] backdrop-blur sm:p-5">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-400 to-green-400"></div>
+                    <div class="space-y-4">
+                        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-lg shadow-slate-200/40 transition duration-300 hover:-translate-y-0.5 hover:shadow-soft">
+                            <label for="playerName" class="mb-2 flex items-center gap-2 text-sm font-black text-slate-600">
+                                <i data-lucide="user-round" class="h-4 w-4 text-blue-600"></i>
+                                Player Name
+                            </label>
+                            <input id="playerName" maxlength="24" placeholder="Player A" class="h-14 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-lg font-bold text-slate-900 outline-none transition duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
                         </div>
-                    </div>
 
-                    <div id="joinPanel" class="hidden rounded-2xl border border-green-100 bg-green-50/80 p-4 shadow-lg shadow-green-100/50 transition-all duration-300">
-                        <h2 class="mb-3 flex items-center gap-2 text-sm font-black text-green-700">
-                            <i data-lucide="door-open" class="h-4 w-4"></i>
-                            Room Code
-                        </h2>
-                        <div class="grid gap-2 sm:grid-cols-[1fr_auto]">
-                            <input id="roomCodeInput" maxlength="6" placeholder="AB12CD" class="h-12 rounded-xl border border-green-100 bg-white px-4 font-mono text-lg font-black uppercase text-slate-900 outline-none transition duration-300 focus:border-green-500 focus:ring-4 focus:ring-green-100">
-                            <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 font-black text-white shadow-lg shadow-green-100 transition duration-300 hover:-translate-y-0.5 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-100 active:translate-y-0" id="joinBtn">
-                                <i data-lucide="arrow-right" class="h-4 w-4"></i>
-                                Join
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <button class="group rounded-2xl border border-slate-200 bg-white px-5 py-5 text-left font-black text-slate-900 shadow-lg shadow-slate-200/50 transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:bg-blue-50/60 hover:shadow-soft focus:outline-none focus:ring-4 focus:ring-blue-100 active:translate-y-0" id="showJoinBtn">
+                                <span class="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-600 transition duration-300 group-hover:bg-blue-600 group-hover:text-white">
+                                    <i data-lucide="log-in" class="h-5 w-5"></i>
+                                </span>
+                                <span class="block text-lg">Join Game</span>
+                                <span class="mt-1 block text-xs font-bold text-slate-400">Enter a room code</span>
                             </button>
+                            <button class="group rounded-2xl bg-blue-600 px-5 py-5 text-left font-black text-white shadow-glow transition duration-300 hover:-translate-y-1 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200 active:translate-y-0" id="showMakeBtn">
+                                <span class="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-white/15 transition duration-300 group-hover:bg-white/25">
+                                    <i data-lucide="plus" class="h-5 w-5"></i>
+                                </span>
+                                <span class="block text-lg">Make a Room</span>
+                                <span class="mt-1 block text-xs font-bold text-blue-100">Host a new match</span>
+                            </button>
+                        </div>
+
+                        <div id="makePanel" class="hidden rounded-2xl border border-blue-100 bg-blue-50/90 p-4 shadow-lg shadow-blue-100/50 transition-all duration-300">
+                            <h2 class="mb-3 flex items-center gap-2 text-sm font-black text-blue-700">
+                                <i data-lucide="users-round" class="h-4 w-4"></i>
+                                Choose Players
+                            </h2>
+                            <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                                <button data-capacity="2" class="rounded-xl bg-white px-3 py-4 text-sm font-black text-slate-800 shadow-sm ring-1 ring-blue-100 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-100 active:translate-y-0">2 Player</button>
+                                <button data-capacity="3" class="rounded-xl bg-white px-3 py-4 text-sm font-black text-slate-800 shadow-sm ring-1 ring-blue-100 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-100 active:translate-y-0">3 Player</button>
+                                <button data-capacity="4" class="rounded-xl bg-white px-3 py-4 text-sm font-black text-slate-800 shadow-sm ring-1 ring-blue-100 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-100 active:translate-y-0">4 Player</button>
+                                <button data-capacity="5" class="rounded-xl bg-white px-3 py-4 text-sm font-black text-slate-800 shadow-sm ring-1 ring-blue-100 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-100 active:translate-y-0">5 Player</button>
+                            </div>
+                        </div>
+
+                        <div id="joinPanel" class="hidden rounded-2xl border border-green-100 bg-green-50/80 p-4 shadow-lg shadow-green-100/50 transition-all duration-300">
+                            <h2 class="mb-3 flex items-center gap-2 text-sm font-black text-green-700">
+                                <i data-lucide="door-open" class="h-4 w-4"></i>
+                                Room Code
+                            </h2>
+                            <div class="grid gap-2 sm:grid-cols-[1fr_auto]">
+                                <input id="roomCodeInput" maxlength="6" placeholder="AB12CD" class="h-12 rounded-xl border border-green-100 bg-white px-4 font-mono text-lg font-black uppercase text-slate-900 outline-none transition duration-300 focus:border-green-500 focus:ring-4 focus:ring-green-100">
+                                <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 font-black text-white shadow-lg shadow-green-100 transition duration-300 hover:-translate-y-0.5 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-100 active:translate-y-0" id="joinBtn">
+                                    <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                                    Join
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -204,8 +211,8 @@
                 </div>
             </section>
 
-            <div id="gameBoard" class="grid gap-4 md:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_minmax(420px,2fr)_minmax(220px,1fr)]">
-                <aside class="order-2 overflow-hidden rounded-2xl border border-white/20 bg-white/95 p-4 shadow-soft transition-all duration-300 hover:-translate-y-0.5 md:min-h-[480px] lg:order-1">
+            <div id="gameBoard" class="grid gap-4 md:grid-cols-[minmax(260px,0.9fr)_minmax(420px,1.4fr)]">
+                <aside class="order-2 overflow-hidden rounded-2xl border border-white/20 bg-white/95 p-4 shadow-soft transition-all duration-300 hover:-translate-y-0.5 md:order-1 md:min-h-[480px]">
                     <div class="-mx-4 -mt-4 mb-4 flex items-center justify-between bg-gradient-to-r from-orange-50 to-yellow-50 px-4 py-3">
                         <h2 id="leaderTitle" class="flex items-center gap-2 text-lg font-black text-slate-950">
                             <i data-lucide="trophy" class="h-5 w-5 text-orange-500"></i>
@@ -221,7 +228,7 @@
                     </div>
                 </aside>
 
-                <section id="guessBox" class="order-1 overflow-hidden rounded-2xl border border-blue-100 bg-white/95 p-5 shadow-glow transition-all duration-300 md:col-span-2 lg:order-2 lg:col-span-1 lg:p-6">
+                <section id="guessBox" class="order-1 overflow-hidden rounded-2xl border border-blue-100 bg-white/95 p-5 shadow-glow transition-all duration-300 md:order-2 lg:p-6">
                     <div class="-mx-6 -mt-6 mb-6 h-2 bg-gradient-to-r from-blue-600 via-indigo-500 to-green-500"></div>
                     <div class="mb-5 flex items-center justify-center">
                         <div class="grid h-20 w-20 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-glow transition duration-300 hover:scale-105">
@@ -256,15 +263,6 @@
                     <div id="message" class="mt-5 hidden rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4 text-center text-lg font-black text-blue-700 shadow-lg shadow-blue-100/50 transition-all duration-300"></div>
                 </section>
 
-                <aside class="order-3 overflow-hidden rounded-2xl border border-white/20 bg-white/95 p-4 shadow-soft transition-all duration-300 hover:-translate-y-0.5 md:min-h-[480px]">
-                    <div class="-mx-4 -mt-4 mb-4 flex items-center justify-between bg-gradient-to-r from-blue-50 to-green-50 px-4 py-3">
-                        <h2 class="flex items-center gap-2 text-lg font-black text-slate-950">
-                            <i data-lucide="users-round" class="h-5 w-5 text-blue-600"></i>
-                            Players
-                        </h2>
-                    </div>
-                    <div id="playersList" class="space-y-3"></div>
-                </aside>
             </div>
         </section>
     </main>

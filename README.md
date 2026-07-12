@@ -20,8 +20,8 @@ Tujuan proyek ini adalah mengubah game Guess the Number dari single-player menja
 | Multiple Rounds | Game berjalan selama 5 ronde. |
 | Timer | Timer ronde dimulai saat ronde aktif dan berhenti saat semua pemain selesai. |
 | Score System | Skor dihitung server berdasarkan jumlah tebakan dan waktu penyelesaian ronde. |
-| Leaderboard | Ranking diperbarui real-time dan final leaderboard tampil di akhir game. |
-| Player Status | Status pemain: `WAITING`, `PLAYING`, `FINISHED_ROUND`. |
+| Leaderboard | Ranking diperbarui real-time, menampilkan semua pemain, skor, koneksi, host, dan status ronde. |
+| Player Status | Status pemain ditampilkan langsung di leaderboard: `WAITING`, `PLAYING`, `FINISHED_ROUND`. |
 | Auto Reconnect | Browser refresh dapat reconnect memakai identitas pemain di `localStorage`. |
 | Responsive UI | UI Tailwind responsif untuk desktop, tablet, dan mobile. |
 
@@ -36,6 +36,18 @@ Tujuan proyek ini adalah mengubah game Guess the Number dari single-player menja
 | Tailwind CSS | Styling UI modern dan responsif. |
 | Lucide Icons | Icon set untuk UI. |
 | In-memory Store | Penyimpanan state room sementara di memory server. |
+
+## Implementation Plan
+
+1. Backend menjadi sumber utama state room, player, ronde, skor, dan leaderboard.
+2. Client membuat atau join room melalui Socket.IO, lalu menyimpan identitas minimal di `localStorage`.
+3. Server mengirim snapshot room terbaru setiap ada perubahan state penting.
+4. Waiting Hall menampilkan slot pemain sampai kapasitas room terpenuhi.
+5. Saat room penuh, server menjalankan countdown sinkron dan memulai ronde.
+6. Selama ronde aktif, setiap tebakan divalidasi server dan hint hanya dikirim ke pemain terkait.
+7. Skor dihitung server ketika pemain berhasil menebak angka benar.
+8. Leaderboard menggabungkan ranking, skor, host badge, koneksi, dan status setiap pemain.
+9. Setelah semua ronde selesai, final leaderboard dan podium ditampilkan dari snapshot server.
 
 ## Project Structure
 
@@ -119,7 +131,8 @@ Untuk simulasi multiplayer, buka URL yang sama di beberapa browser atau tab.
 12. Jika tebakan salah, pemain mendapat hint personal.
 13. Jika tebakan benar, pemain berstatus `FINISHED_ROUND`, skor ronde langsung dikunci, dan pemain menunggu pemain lain.
 14. Ronde berikutnya dimulai setelah semua pemain menyelesaikan ronde berjalan.
-15. Setelah seluruh ronde selesai, game menampilkan final leaderboard.
+15. Leaderboard selalu menampilkan semua pemain beserta skor, status koneksi, host badge, dan status ronde.
+16. Setelah seluruh ronde selesai, game menampilkan final leaderboard.
 
 ## Game States
 
@@ -154,7 +167,7 @@ Setiap room menyimpan state di memory server, termasuk:
 - attempts
 - player status
 - timer
-- leaderboard
+- leaderboard lengkap dengan status pemain
 - winner
 
 Browser hanya menyimpan identitas minimal di `localStorage`:
