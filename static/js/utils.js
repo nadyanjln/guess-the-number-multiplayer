@@ -42,9 +42,9 @@ export function rankMedal(rank) {
 }
 
 export function rankTone(rank) {
-    if (rank === 1) return "border-yellow-100 bg-yellow-50";
-    if (rank === 2) return "border-slate-200 bg-slate-50";
-    if (rank === 3) return "border-orange-100 bg-orange-50";
+    if (rank === 1) return "border-yellow-200 bg-gradient-to-br from-yellow-50 to-amber-100";
+    if (rank === 2) return "border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100";
+    if (rank === 3) return "border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100";
     return "border-slate-100 bg-white";
 }
 

@@ -27,6 +27,7 @@ function bindUiEvents() {
     $("#showMakeBtn").addEventListener("click", () => toggleStartPanel("make"));
     $("#joinBtn").addEventListener("click", joinRoom);
     $("#backBtn").addEventListener("click", backToMain);
+    $("#copyRoomBtn").addEventListener("click", copyRoomCode);
     $("#playAgainBtn").addEventListener("click", playAgain);
 
     elements.guessBtn.addEventListener("click", submitGuess);
@@ -143,6 +144,21 @@ function playAgain() {
     });
 }
 
+async function copyRoomCode() {
+    const code = (state.snapshot?.room_code || state.roomCode || $("#roomCode").textContent).trim();
+    if (!code || code === "------") {
+        showMessage("Room code belum tersedia.", "error");
+        return;
+    }
+
+    try {
+        await writeClipboard(code);
+        showMessage("Room code copied.", "success");
+    } catch {
+        showMessage("Gagal copy room code.", "error");
+    }
+}
+
 function backToMain() {
     if (state.roomCode && state.playerId) {
         socket.emit("disconnectPlayer", {
@@ -195,4 +211,21 @@ function focusGuessInputIfAllowed() {
 
 function playerName(fallback) {
     return $("#playerName").value.trim() || fallback;
+}
+
+async function writeClipboard(value) {
+    if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+        return;
+    }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = value;
+    textarea.setAttribute("readonly", "");
+    textarea.className = "fixed -left-[9999px] top-0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    const copied = document.execCommand("copy");
+    textarea.remove();
+    if (!copied) throw new Error("Clipboard copy failed.");
 }
